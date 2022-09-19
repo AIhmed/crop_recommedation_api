@@ -3,14 +3,29 @@ from .schemas import RecommendationBase
 from sqlalchemy.orm import Session
 
 
+def model_to_base(record: RecommendationModel):
+    recommendation = RecommendationBase(
+            nitrogen=record.nitrogen,
+            phosphorous=record.phosphorous,
+            potassium=record.potassium,
+            temperature=record.temperature,
+            humidity=record.humidity,
+            ph=record.ph,
+            rainfall=record.rainfall,
+            label=record.label)
+    return recommendation
+
+
 def get_recommendations(db: Session):
-    record = db.query(RecommendationModel).all()
-    return record
+    records = db.query(RecommendationModel).all()
+    recommendations = [model_to_base(record) for record in records]
+    return recommendations
 
 
 def get_recommendation(recommendation_id: int, db: Session):
     record = db.query(RecommendationModel).get(recommendation_id)
-    return record
+    recommendation = model_to_base(record)
+    return recommendation
 
 
 def create_recommendation(recommendation: RecommendationBase, db: Session):
@@ -25,7 +40,7 @@ def create_recommendation(recommendation: RecommendationBase, db: Session):
             label=recommendation.label)
     db.add(record)
     db.commit()
-    return record
+    return recommendation
 
 
 def modify_recommendation(recommendation_id: int, db: Session):
@@ -39,9 +54,13 @@ def modify_recommendation(recommendation_id: int, db: Session):
     record.rainfall = record.rainfall,
     record.label = record.label
     db.commit()
-    return record
+    recommendation = model_to_base(record)
+    return recommendation
 
 
 def delete_recommendation(recommendation_id: int, db: Session):
     db.query(RecommendationModel).get(recommendation_id).delete()
     db.commit()
+    records = db.qeury(RecommendationModel).all()
+    recommendations = [model_to_base(record) for record in records]
+    return recommendations

@@ -2,7 +2,7 @@ from typing import List
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from database import config, db_operations, models, schemas
-import pandas as pd
+# import pandas as pd
 
 models.Base.metadata.create_all(bind=config.engine)
 
@@ -64,8 +64,7 @@ async def update_recommendation(recommendation_id: int, recommendation: schemas.
     return record
 
 
-@app.delete('/', response_model=schemas.RecommendationBase)
+@app.delete('/', response_model=List[schemas.RecommendationBase])
 async def delete_recommendation(recommendation_id: int, db: Session = Depends(get_db)):
-    db_operations.delete_recommendation(recommendation_id, db)
-    records = db.query(models.RecommendationModel).all()
-    return records
+    recommendations = db_operations.delete_recommendation(recommendation_id, db)
+    return recommendations
